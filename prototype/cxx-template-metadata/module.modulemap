@@ -1,0 +1,5 @@
+module ProbeTypes {
+  header "Types.h"
+  requires cplusplus
+  export *
+}
