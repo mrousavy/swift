@@ -272,7 +272,6 @@ static void printSwiftExistentialTypeMethodDefs(raw_ostream &os) {
   os << "// Out-of-line SwiftExistentialType methods.\n";
   os << "// Needs the complete VWT declared above.\n\n";
 
-  // Template prefix for all out-of-line definitions (C++17, no concepts).
   const char *tmplPrefix = "template <typename... Tags>\n";
   const char *cls = "SwiftExistentialType<Tags...>";
 
@@ -304,9 +303,8 @@ static void printSwiftExistentialTypeMethodDefs(raw_ostream &os) {
   os << "  _type = src._type;\n";
   os << "  _getVWT()->initializeBufferWithCopyOfBuffer(\n";
   os << "      _buffer, const_cast<void **>(src._buffer), _type);\n";
-  os << "  if constexpr (ExistentialTagTraits<Tags...>::NumWitnessTables > 0)\n";
-  os << "    for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
-  os << "      this->_witnessTables[i] = src._witnessTables[i];\n";
+  os << "  for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
+  os << "    this->_witnessTables[i] = src._witnessTables[i];\n";
   os << "}\n\n";
 
   // _initializeWithValue
@@ -373,9 +371,8 @@ static void printSwiftExistentialTypeMethodDefs(raw_ostream &os) {
   os << "      \"copying a ~Copyable existential; Tags contain NonCopyable\");\n";
   os << "  _getVWT()->initializeBufferWithCopyOfBuffer(\n";
   os << "      _buffer, const_cast<void **>(other._buffer), _type);\n";
-  os << "  if constexpr (ExistentialTagTraits<Tags...>::NumWitnessTables > 0)\n";
-  os << "    for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
-  os << "      this->_witnessTables[i] = other._witnessTables[i];\n";
+  os << "  for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
+  os << "    this->_witnessTables[i] = other._witnessTables[i];\n";
   os << "}\n\n";
 
   // Move constructor. Uses copy semantics; C++ move is non-consuming.
@@ -386,9 +383,8 @@ static void printSwiftExistentialTypeMethodDefs(raw_ostream &os) {
   os << "    : _type(other._type) {\n";
   os << "  _getVWT()->initializeBufferWithCopyOfBuffer(\n";
   os << "      _buffer, other._buffer, _type);\n";
-  os << "  if constexpr (ExistentialTagTraits<Tags...>::NumWitnessTables > 0)\n";
-  os << "    for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
-  os << "      this->_witnessTables[i] = other._witnessTables[i];\n";
+  os << "  for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
+  os << "    this->_witnessTables[i] = other._witnessTables[i];\n";
   os << "}\n\n";
 
   // Copy assignment
@@ -404,9 +400,8 @@ static void printSwiftExistentialTypeMethodDefs(raw_ostream &os) {
   os << "    _type = other._type;\n";
   os << "    _getVWT()->initializeBufferWithCopyOfBuffer(\n";
   os << "        _buffer, const_cast<void **>(other._buffer), _type);\n";
-  os << "    if constexpr (ExistentialTagTraits<Tags...>::NumWitnessTables > 0)\n";
-  os << "      for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
-  os << "        this->_witnessTables[i] = other._witnessTables[i];\n";
+  os << "    for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
+  os << "      this->_witnessTables[i] = other._witnessTables[i];\n";
   os << "  }\n";
   os << "  return *this;\n";
   os << "}\n\n";
@@ -422,9 +417,8 @@ static void printSwiftExistentialTypeMethodDefs(raw_ostream &os) {
   os << "    _type = other._type;\n";
   os << "    _getVWT()->initializeBufferWithCopyOfBuffer(\n";
   os << "        _buffer, other._buffer, _type);\n";
-  os << "    if constexpr (ExistentialTagTraits<Tags...>::NumWitnessTables > 0)\n";
-  os << "      for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
-  os << "        this->_witnessTables[i] = other._witnessTables[i];\n";
+  os << "    for (size_t i = 0; i < ExistentialTagTraits<Tags...>::NumWitnessTables; ++i)\n";
+  os << "      this->_witnessTables[i] = other._witnessTables[i];\n";
   os << "  }\n";
   os << "  return *this;\n";
   os << "}\n\n";

@@ -3,6 +3,7 @@
 // RUN: %FileCheck %s < %t/core.h
 
 // RUN: %check-interop-cxx-header-in-clang(%t/core.h)
+// RUN: %target-interop-build-clangxx -std=c++17 -fsyntax-only %S/Inputs/swift-existential-type.cpp -I %t -DSWIFT_CXX_EXISTENTIAL_INTEROP -Werror=class-conversion
 
 // REQUIRES: swift_feature_CxxExistentialInterop
 

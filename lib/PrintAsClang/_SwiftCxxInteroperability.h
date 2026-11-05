@@ -277,7 +277,6 @@ public:
 
 #if defined(SWIFT_CXX_EXISTENTIAL_INTEROP) && __cplusplus >= 201703L
 
-// Forward-declared; defined after VWT in the generated scaffolding.
 struct ValueWitnessTable;
 
 struct BoxPair {
@@ -287,12 +286,11 @@ struct BoxPair {
 extern "C" BoxPair swift_allocBox(void *_Nonnull type) noexcept;
 extern "C" void *_Nonnull swift_projectBox(void *_Nonnull object) noexcept;
 
-// --- Tag traits for existential type parameters (C++17, no concepts) ---
+// --- Tag traits for existential type parameters ---
 //
 // A protocol tag has a WitnessTable typedef (generated per-protocol).
 // A marker protocol tag has an IsMarker member but no WitnessTable.
-// Keep only the NonCopyable inverse tag: it gates ~Copyable lifecycle.
-// All other inverses stay out of the scaffolding by design.
+// NonCopyable models ~Copyable existentials.
 
 struct NonCopyable {};
 
@@ -322,15 +320,10 @@ struct ExistentialTagTraits {
       !(... || std::is_same_v<Tags, NonCopyable>);
 };
 
-// --- Conditional conversion to Any (C++17, no concepts) ---
+// --- Conditional conversion to Any ---
 //
-// CRTP base providing the implicit conversion to Any
-// (SwiftExistentialType<>). The primary template is empty; only the
-// <Derived, true> specialization declares the operator. Any itself and
-// ~Copyable existentials inherit the empty base, so they never declare a
-// conversion to self: that keeps -Wclass-conversion quiet without concepts
-// (a constrained-out requires member is skipped when Any is instantiated,
-// but a SFINAE member template pattern still warns).
+// Any and ~Copyable existentials omit the conversion. A specialized CRTP
+// base avoids -Wclass-conversion when instantiating Any.
 template <typename... Tags> class SwiftExistentialType;
 
 template <typename Derived, bool Enable>
@@ -356,7 +349,7 @@ class SwiftExistentialType : public SwiftExistentialAnyConversion<
       "typedef), marker tags (with an IsMarker member), or NonCopyable. See "
       "the generated protocol header for valid tags.");
 
-  template <typename... U> friend class SwiftExistentialType;
+  // The class-bound conversion to Any initializes the opaque container.
   template <typename... U> friend class SwiftClassExistentialType;
   template <typename D, bool B> friend struct SwiftExistentialAnyConversion;
 
@@ -434,27 +427,20 @@ class SwiftClassExistentialType {
       "WitnessTable typedef), marker tags (with an IsMarker member), or "
       "NonCopyable. See the generated protocol header for valid tags.");
 
-  template <typename... U> friend class SwiftExistentialType;
-  template <typename... U> friend class SwiftClassExistentialType;
-
 public:
   SWIFT_INLINE_THUNK SwiftClassExistentialType(
       const SwiftClassExistentialType &other) noexcept
       : _value(other._value) {
     if (_value) swift_retain(reinterpret_cast<void *_Nonnull>(_value));
-    if constexpr (Traits::NumWitnessTables > 0) {
-      for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
-        this->_witnessTables[i] = other._witnessTables[i];
-    }
+    for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
+      this->_witnessTables[i] = other._witnessTables[i];
   }
   SWIFT_INLINE_THUNK SwiftClassExistentialType(
       SwiftClassExistentialType &&other) noexcept
       : _value(other._value) {
     other._value = nullptr;
-    if constexpr (Traits::NumWitnessTables > 0) {
-      for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
-        this->_witnessTables[i] = other._witnessTables[i];
-    }
+    for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
+      this->_witnessTables[i] = other._witnessTables[i];
   }
   SWIFT_INLINE_THUNK SwiftClassExistentialType &
   operator=(const SwiftClassExistentialType &other) noexcept {
@@ -463,10 +449,8 @@ public:
       _value = other._value;
       if (_value) swift_retain(reinterpret_cast<void *_Nonnull>(_value));
       if (old) swift_release(reinterpret_cast<void *_Nonnull>(old));
-      if constexpr (Traits::NumWitnessTables > 0) {
-        for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
-          this->_witnessTables[i] = other._witnessTables[i];
-      }
+      for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
+        this->_witnessTables[i] = other._witnessTables[i];
     }
     return *this;
   }
@@ -476,10 +460,8 @@ public:
       if (_value) swift_release(reinterpret_cast<void *_Nonnull>(_value));
       _value = other._value;
       other._value = nullptr;
-      if constexpr (Traits::NumWitnessTables > 0) {
-        for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
-          this->_witnessTables[i] = other._witnessTables[i];
-      }
+      for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
+        this->_witnessTables[i] = other._witnessTables[i];
     }
     return *this;
   }
@@ -499,10 +481,8 @@ protected:
   _initializeWithCopy(const SwiftClassExistentialType &src) noexcept {
     _value = src._value;
     if (_value) swift_retain(reinterpret_cast<void *_Nonnull>(_value));
-    if constexpr (Traits::NumWitnessTables > 0) {
-      for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
-        this->_witnessTables[i] = src._witnessTables[i];
-    }
+    for (size_t i = 0; i < Traits::NumWitnessTables; ++i)
+      this->_witnessTables[i] = src._witnessTables[i];
   }
 
   SWIFT_INLINE_PRIVATE_HELPER void *_Nonnull
